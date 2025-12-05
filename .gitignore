@@ -1,0 +1,93 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# pyenv
+.python-version
+
+# Environments
+env/
+venv/
+ENV/
+.venv/
+venv.bak/
+
+# VS Code
+.vscode/
+
+# IDEs
+.idea/
+
+# Jupyter
+.ipynb_checkpoints
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Private environment and secret files
+.env
+.env.*
+secrets.json
+credentials.json
+*.key
+*.pem
+
+# Python bytecode cache
+.pytest_cache/
+.mypy_cache/
+
+# Dependency lock files (if you prefer to ignore them)
+Pipfile.lock
+poetry.lock
+
+# Large or generated data
+data/raw/
+data/raw_html/
+data/raw_pdf/
+
+# Notebook checkpoints and outputs
+*.ipynb

@@ -1,0 +1,31 @@
+# --- Core LLM & Agent Framework ---
+agno
+openai
+
+# --- API Framework ---
+fastapi
+uvicorn
+
+# --- Database & Vector Support ---
+sqlalchemy
+psycopg[binary]
+pgvector
+
+# --- Document Processing ---
+pypdf
+
+# --- HTML Parsing ---
+beautifulsoup4
+requests
+
+# --- Knowledge Graph ---
+networkx
+
+# --- Environment & Utilities ---
+python-dotenv
+numpy
+tqdm
+
+# --- FastAPI Dependencies ---
+pydantic
+pydantic-extra-types
