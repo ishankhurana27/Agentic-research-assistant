@@ -1,20 +1,26 @@
 # agents/report_agent.py
-from agno.agent import Agent
-from agno.models.groq import Groq
-from config import GROQ_MODEL, GROQ_API_KEY
 
-report_agent = Agent(
-    id="report-agent",
-    name="Report Agent",
-    model=Groq(id=GROQ_MODEL, api_key=GROQ_API_KEY)
+from agents.simple_agent import SimpleAgent
+from config import GROQ_MODEL
+
+
+# Report Agent
+report_agent = SimpleAgent(
+    model=GROQ_MODEL,
+    system="""
+You are a senior research assistant.
+Write polished, well-structured, professional research reports.
+Follow the exact sections requested.
+"""
 )
 
+
 def generate_report(question: str, validated_summary: str):
-    result = report_agent.run(
-        system="Write a polished, structured final research report.",
-        messages=[
-            {"role": "user", "content":
-f"""
+
+    response = report_agent.run([
+        {
+            "role": "user",
+            "content": f"""
 Write a structured research report.
 
 Question: {question}
@@ -28,7 +34,8 @@ Sections:
 - Detailed Analysis
 - Limitations
 - Sources
-"""}
-        ]
-    )
-    return result.content
+"""
+        }
+    ])
+
+    return response

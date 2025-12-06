@@ -1,40 +1,34 @@
 # agents/validator_agent.py
 
-from agno.agent import Agent
-from agno.models.groq import Groq
-from config import GROQ_MODEL, GROQ_API_KEY
+from agents.simple_agent import SimpleAgent
+from config import GROQ_MODEL
 
-# Create agent using Agno v2 model object
-validator_agent = Agent(
-    id="validator-agent",
-    name="Validator Agent",
-    model=Groq(id=GROQ_MODEL, api_key=GROQ_API_KEY)
+
+# Use same model as RAG or switch to a fast model if you want.
+validator_agent = SimpleAgent(
+    model=GROQ_MODEL,
+    system="""
+You are a logic-based validator.
+
+Your task:
+- Validate claims ONLY using logical reasoning.
+- Do NOT invent new facts.
+- Identify inconsistencies clearly.
+- If a claim cannot be validated, say so explicitly.
+"""
 )
+
 
 def validate(view: dict):
     """
-    Validate claims using deductive reasoning.
-    No new facts should be invented.
+    Validate structured content logically.
     """
-    result = validator_agent.run(
-        system="""
-<role>
-You are a logic-based validator.
-</role>
 
-<instructions>
-- Validate claims ONLY using reasoning.
-- Do NOT add new facts.
-- Identify inconsistencies.
-- If something cannot be validated, say so.
-</instructions>
-""",
-        messages=[
-            {
-                "role": "user",
-                "content": f"Validate this content logically:\n\n{view}"
-            }
-        ]
-    )
+    response = validator_agent.run([
+        {
+            "role": "user",
+            "content": f"Validate this content logically:\n\n{view}"
+        }
+    ])
 
-    return result.content
+    return response

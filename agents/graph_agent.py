@@ -1,23 +1,35 @@
 # agents/graph_agent.py
 
-from agno.agent import Agent
-from agno.models.groq import Groq
-from config import GROQ_MODEL, GROQ_API_KEY
+from agents.simple_agent import SimpleAgent
+from config import GROQ_MODEL
 
-graph_agent = Agent(
-    id="graph-agent",
-    name="Graph Agent",
-    model=Groq(id=GROQ_MODEL, api_key=GROQ_API_KEY),
-    instructions=[
-        "Analyze the text and describe relationships between the major concepts.",
-        "Return only structured bullet points.",
-    ]
+
+# Graph agent with simple instructions
+graph_agent = SimpleAgent(
+    model=GROQ_MODEL,
+    system="""
+You are an expert knowledge graph extractor.
+
+Your tasks:
+- Analyze the input text.
+- Identify the MAJOR concepts.
+- Identify relationships between concepts.
+- Return ONLY structured bullet points.
+- Do NOT invent extra information.
+- Base everything strictly on the text.
+"""
 )
 
+
 def build_graph(text: str):
-    result = graph_agent.run(
-        messages=[
-            {"role": "user", "content": f"Extract key relationships:\n\n{text}"}
-        ]
-    )
-    return result.content
+    response = graph_agent.run([
+        {
+            "role": "user",
+            "content": (
+                f"Extract the key relationships from this text:\n\n{text}\n\n"
+                "Return the answer as bullet points describing relationships."
+            )
+        }
+    ])
+    
+    return response

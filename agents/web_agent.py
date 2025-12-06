@@ -1,39 +1,36 @@
 # agents/web_agent.py
 
-from agno.agent import Agent
-from agno.models.groq import Groq
-from config import GROQ_MODEL, GROQ_API_KEY
-from services.web_search import web_search_service
+from agents.simple_agent import SimpleAgent     # <-- New simple agent
+from config import GROQ_FAST_MODEL              # use the fast model for query rewriting
+from services.serper_search import serper_search
 
-web_agent = Agent(
-    id="web-agent",
-    name="Web Agent",
-    model=Groq(id=GROQ_MODEL, api_key=GROQ_API_KEY)
+
+# Create the agent
+web_agent = SimpleAgent(
+    model=GROQ_FAST_MODEL,
+    system="""
+You refine search queries.
+Output ONLY 2–4 keywords.
+Never answer the question.
+Never produce sentences.
+"""
 )
+
 
 def web_search(query: str):
 
-    result = web_agent.run(
-        input=f"Clean this search query: {query}",
-        system="""
-<role>
-You refine search queries.
-</role>
+    refined = web_agent.run([
+        {"role": "user", "content": query}
+    ])
 
-<instructions>
-- Return ONLY a short search query.
-- DO NOT answer the question.
-- DO NOT generate sentences.
-- DO NOT say anything else.
-- Output ONLY 2–4 keywords.
-</instructions>
-        """,
-        messages=[
-            {"role": "user", "content": query}
-        ]
-    )
-
-    refined = result.content.strip()
+    refined = refined.strip()
     print("[*] Refined Query:", refined)
 
-    return web_search_service(refined)
+    results = serper_search(refined, num_results=10)
+
+    # return only URLs
+    urls = [r["url"] for r in results]
+    print(f"[*] Serper returned {len(urls)} links")
+
+    return urls
+

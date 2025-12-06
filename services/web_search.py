@@ -1,18 +1,13 @@
 # services/web_search.py
+
 import requests
 
 def web_search_service(query: str, top_k: int = 5):
     """
     Performs a free web search using DuckDuckGo Instant API.
-    Returns a list of dicts:
-    [
-        {
-            "url": "...",
-            "title": "...",
-            "is_pdf": bool
-        }
-    ]
+    Returns a simple list of URLs.
     """
+
     url = "https://api.duckduckgo.com/"
     params = {
         "q": query,
@@ -25,28 +20,24 @@ def web_search_service(query: str, top_k: int = 5):
         r = requests.get(url, params=params, timeout=10)
         data = r.json()
 
-        results = []
+        urls = []
 
-        # Extract "RelatedTopics" URLs
+        # Extract URLs from "RelatedTopics"
         for topic in data.get("RelatedTopics", []):
             if "FirstURL" in topic:
-                link = topic["FirstURL"]
-                results.append({
-                    "url": link,
-                    "title": topic.get("Text", "Webpage"),
-                    "is_pdf": link.lower().endswith(".pdf")
-                })
+                urls.append(topic["FirstURL"])
 
         # Fallback to AbstractURL
-        if "AbstractURL" in data and data["AbstractURL"]:
-            link = data["AbstractURL"]
-            results.append({
-                "url": link,
-                "title": data.get("Heading", "Webpage"),
-                "is_pdf": link.lower().endswith(".pdf")
-            })
+        if data.get("AbstractURL"):
+            urls.append(data["AbstractURL"])
 
-        return results[:top_k]
+        # Return only top-k unique URLs
+        clean_urls = []
+        for u in urls:
+            if u not in clean_urls:
+                clean_urls.append(u)
+
+        return clean_urls[:top_k]
 
     except Exception as e:
         print(f"❌ Web search error: {e}")

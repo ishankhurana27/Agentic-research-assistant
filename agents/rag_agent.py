@@ -1,38 +1,47 @@
 # agents/rag_agent.py
 
-from agno.agent import Agent
-from config import GROQ_MODEL
-from services.embedding_service import embed_text
+from agents.simple_agent import SimpleAgent
+from config import GROQ_MODEL, TOP_K
 from services.vector_store import search_similar
+from sentence_transformers import SentenceTransformer
 
-# Create agent
-rag_agent = Agent(
-    id="rag-agent",
-    name="RAG Agent",
-    model=GROQ_MODEL
+embedder = None
+
+def get_embedder():
+    global embedder
+    if embedder is None:
+        print("[*] Loading embedding model...")
+        embedder = SentenceTransformer("all-MiniLM-L6-v2")
+    return embedder
+
+# Create the agent (no Agno!)
+rag_agent = SimpleAgent(
+    model=GROQ_MODEL,
+    system="You are a Retrieval-Augmented Generation agent. Use ONLY the provided context."
 )
 
-def run_rag(question: str, top_k: int = 5):
-    # 1. Embed the question
-    query_vec = embed_text(question)
+def run_rag(question: str):
+    emb = get_embedder().encode(question).tolist()
 
-    # 2. Fetch similar documents
-    docs = search_similar(query_vec, top_k)
+    docs = search_similar(emb, top_k=TOP_K)
 
-    # Build context string
-    context = ""
-    for d in docs:
-        context += f"[{d['url']}] {d['title']}\n{d['content']}\n\n"
+    if not docs:
+        context = "No relevant documents found."
+    else:
+        context = "\n\n".join(
+            f"[{d['source']}] {d['title']}\n{d['content'][:800]}"
+            for d in docs
+        )
 
-    # 3. Ask LLM using Agno v2 run() syntax
-    result = rag_agent.run(
-        input=(
-            "Use ONLY the context below to answer the question.\n"
-            "If the context is irrelevant or empty, say so.\n\n"
-            f"Question: {question}\n\n"
-            f"Context:\n{context}"
-        ),
-        system="Retrieve and answer strictly using context. No outside facts."
-    )
-
-    return result.content
+    response = rag_agent.run([
+        {
+            "role": "user",
+            "content": (
+                f"Context:\n{context}\n\n"
+                f"Question: {question}\n\n"
+                "Answer strictly using the above context."
+            )
+        }
+    ])
+    
+    return response

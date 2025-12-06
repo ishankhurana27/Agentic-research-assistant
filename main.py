@@ -7,6 +7,7 @@ from agents.graph_agent import build_graph
 from agents.validator_agent import validate
 from agents.report_agent import generate_report
 
+
 def build_ingestion_items(links):
     items = []
     for url in links:
@@ -15,6 +16,7 @@ def build_ingestion_items(links):
             "is_pdf": str(url).lower().endswith(".pdf")
         })
     return items
+
 
 def run_research_pipeline(question):
     print("[*] Searching web for candidate documents...")
@@ -31,15 +33,26 @@ def run_research_pipeline(question):
     print("[*] Running graph agent...")
     graph_view = build_graph(rag_view)
 
-    combined = {"web": links, "rag": rag_view, "graph": graph_view}
+    # Prepare combined text for validation
+    combined_text = f"""
+Web Search Results:
+{links}
+
+RAG Summary:
+{rag_view}
+
+Graph Extraction:
+{graph_view}
+"""
 
     print("[*] Validating summary...")
-    validated = validate(combined)
+    validated = validate(combined_text)
 
     print("[*] Generating final report...")
     final_report = generate_report(question, validated)
 
     return final_report
+
 
 if __name__ == "__main__":
     print("MAIN IMPORTED")
